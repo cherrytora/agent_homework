@@ -36,7 +36,7 @@ NER和情感分析Model選取，嘗試了以下幾種，最後綜合表現由`Ge
 5. Gemini本人
 
 ### 流程說明
-<img src="img/Sentiment_flow.svg" alt="輿情分析folw" width="50%">
+<img src="img/Sentiment_flow.svg" alt="輿情分析folw" width="30%">
 
 1. **A[Start]**：工作流開始，接收使用者輸入的問題。
 2. **B[check_sentiment_related]**：檢查問題是否與輿情分析相關。
