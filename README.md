@@ -8,10 +8,7 @@ root/
 │   └── Sentiment_flow.svg
 └── sentiment_bot/
     ├── dockerfile
-    ├── news_crawler.py
     ├── requirements.txt
-    ├── sentiment_bot_old.py
-    ├── sentiment_bot-normal.py
     └── sentiment_bot.py
 ├── .env
 ├── .gitignore
