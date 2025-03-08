@@ -20,10 +20,6 @@ root/
 └── requirements.txt
 ```
 
-docker build -t sentiment-bot .
-docker run -e GOOGLE_API_KEY="AIzaSyAVACSnb8COAiPDsjaQETyqkgpzKB0lVFI" sentiment-bot
-docker run -it -v /Users/sirius/docs/agent_homework/sentiment_bot:/app -e GOOGLE_API_KEY="AIzaSyAVACSnb8COAiPDsjaQETyqkgpzKB0lVFI" sentiment-bot
-
 ## 輿情分析機器人
 ### 使用方式
 ```
