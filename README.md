@@ -28,12 +28,12 @@ docker run -e GOOGLE_API_KEY="{YOUR_API_KEY}" sentiment-bot
 ```
 
 ### 篩選了幾種
-NER和情感分析Model選取，嘗試了以下幾種，最後綜合表現由`Gemini本人`勝出
-    1. spaCy（zh-core-web-sm, zh-core-web-md, zh-core-web-lg, zh-core-web-trf）皆有嘗試
-    2. Transformers(Bert) 
-    3. Flair
-    4. nltk（沒有支援中文）
-    5. Gemini本人
+NER和情感分析Model選取，嘗試了以下幾種，最後綜合表現由`Gemini本人`勝出  
+1. spaCy（zh-core-web-sm, zh-core-web-md, zh-core-web-lg, zh-core-web-trf）皆有嘗試
+2. Transformers(Bert) 
+3. Flair
+4. nltk（沒有支援中文）
+5. Gemini本人
 
 ### 流程說明
 <img src="img/Sentiment_flow.svg" alt="輿情分析folw" width="50%">
