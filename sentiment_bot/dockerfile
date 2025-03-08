@@ -1,0 +1,28 @@
+# FROM python:3.12-slim
+# WORKDIR /app
+# COPY requirements.txt .
+# # 安裝編譯工具和依賴
+# RUN apt-get update && apt-get install -y \
+#     gcc \
+#     g++ \
+#     python3-dev \
+#     && rm -rf /var/lib/apt/lists/*
+# # 安裝 Python 套件
+# RUN pip install --no-cache-dir -r requirements.txt
+# # 下載 NLTK 資源
+# RUN python -c "import nltk; nltk.download('vader_lexicon')"
+# COPY sentiment_bot.py .
+# CMD ["python", "sentiment_bot.py"]
+
+FROM python:3.12-slim
+WORKDIR /app
+COPY requirements.txt .
+RUN apt-get update && apt-get install -y \
+    gcc \
+    g++ \
+    python3-dev \
+    && rm -rf /var/lib/apt/lists/*
+RUN pip install --no-cache-dir -r requirements.txt
+# RUN python -c "import nltk; nltk.download('vader_lexicon')"
+COPY sentiment_bot.py .
+CMD ["python", "sentiment_bot.py"]
