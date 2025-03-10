@@ -180,7 +180,7 @@ def analyze_content(state: SentimentState) -> SentimentState:
 
     analyses = []
     for i, article in enumerate(state['articles'], 1):
-        content = sanitize_input(article['content'], max_length=1000)
+        content = sanitize_input(article['content'])
         print(f"開始分析新聞 {i}：{article['title']}")
 
         # 情緒分析
