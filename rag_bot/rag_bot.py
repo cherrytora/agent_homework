@@ -10,12 +10,16 @@ import html
 import unicodedata
 
 
-# 配置 Gemini API
+# Gemini API Key
 GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
 genai.configure(api_key=GOOGLE_API_KEY)
-model = genai.GenerativeModel("gemini-1.5-flash")
 
-# 加載 embedding 模型
+# 初始化 Gemini 模型
+version = 'gemini-1.5-flash'
+llm = genai.GenerativeModel(version)
+print(f"模型初始化完成：{version}")
+
+# laod embedding 模型
 embedder = SentenceTransformer('all-MiniLM-L6-v2')
 
 
@@ -77,7 +81,7 @@ def is_list_api_question(question: str) -> bool:
     如果是，返回 "yes"；如果不是，返回 "no"。
     只返回 "yes" 或 "no"，不要有多餘文字。
     """
-    response = model.generate_content(prompt)
+    response = llm.generate_content(prompt)
     return response.text.strip().lower() == "yes"
 
 
@@ -89,7 +93,7 @@ def is_file_summary_question(question: str) -> bool:
     如果是，返回 "yes"；如果不是，返回 "no"。
     只返回 "yes" 或 "no"，不要有多餘文字。
     """
-    response = model.generate_content(prompt)
+    response = llm.generate_content(prompt)
     return response.text.strip().lower() == "yes"
 
 
@@ -101,7 +105,7 @@ def extract_api_from_question(question: str, api_list: List[str]) -> List[str]:
     API 列表: {api_list}
     請返回問題中提到的 API 名稱列表，以逗號分隔。如果沒有提到任何 API，返回 "None"。
     """
-    response = model.generate_content(prompt)
+    response = llm.generate_content(prompt)
     api_names = response.text.strip()
 
     if api_names.lower() == "none":
@@ -206,7 +210,7 @@ def generate(state: State) -> State:
     3. 只需要回答 "yes" 或 "no"，不要有多餘文字。
     4. 如果詢問文章的相關資訊，回答yes。
     """
-    relevance_check_response = model.generate_content(relevance_check_prompt)
+    relevance_check_response = llm.generate_content(relevance_check_prompt)
     if relevance_check_response.text.strip().lower() != "yes":
         state["answer"] = "對不起，這個問題與文件內容無關。"
         return state
@@ -220,7 +224,7 @@ def generate(state: State) -> State:
     文件內容:
     {retrieved_docs}
     """
-    response = model.generate_content(prompt)
+    response = llm.generate_content(prompt)
     state["answer"] = response.text.strip()
     return state
 
