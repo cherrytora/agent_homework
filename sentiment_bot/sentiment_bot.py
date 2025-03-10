@@ -7,12 +7,9 @@ import os
 from typing import TypedDict, Annotated, List, Dict
 from langgraph.graph import StateGraph, END
 import re
-import logging
-import sys
+import html
+import unicodedata
 
-# 設置日誌
-logging.basicConfig(level=logging.INFO,
-                    format='%(asctime)s - %(levelname)s - %(message)s')
 
 GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
 genai.configure(api_key=GOOGLE_API_KEY)
@@ -35,19 +32,20 @@ print(f"模型初始化完成：{version}")
 
 
 # 減少prompt injection風險
-def sanitize_input(text: str, max_length: int = 200) -> str:
-    """清理輸入，減少prompt injection風險"""
-    text = ''.join(c for c in text if not (0xD800 <= ord(c) <= 0xDFFF))
-    text = re.sub(r'[\n\r\t;"]', ' ', text)
-    text = text[:max_length].strip()
+def sanitize_input(text: str) -> str:
+    """清理輸入"""
+    if not isinstance(text, str):
+        return ""
+    text = ''.join(ch for ch in text if unicodedata.category(ch)[0] != 'Cs')
+    text = re.sub(r'<[^>]*>', '', text)
+    text = html.escape(text)
+    text = re.sub(r'[^\w\s\u4e00-\u9fa5]', '', text)
+    text = ' '.join(text.split())
     cleaned = text.encode('utf-8', errors='replace').decode('utf-8')
-    if text != cleaned:
-        logging.warning(f"輸入被清理：原始 '{text}' -> 清理後 '{cleaned}'")
     return cleaned
 
+
 # 節點 1：檢查是否與輿情分析相關
-
-
 def check_sentiment_related(state: SentimentState) -> SentimentState:
     question = sanitize_input(state['question'])
     prompt = f"""你是一個專門判斷問題是否與輿情分析相關的助手，你的任務是嚴格篩選使用者提出的問題。
@@ -68,10 +66,8 @@ def check_sentiment_related(state: SentimentState) -> SentimentState:
         result = response.text.strip()
         state['is_related'] = (result == "是")
         if result not in ["是", "否"]:
-            logging.warning(f"異常回應：'{result}'，默認為否")
             state['is_related'] = False
         print(f"檢查結果：問題是否與輿情相關？{'是' if state['is_related'] else '否'}")
-        sys.stdout.flush()
     except Exception as e:
         print(f"判斷輿情相關性失敗: {e}")
         state['is_related'] = False
@@ -100,10 +96,8 @@ def extract_keywords(state: SentimentState) -> SentimentState:
         if re.match(r'^[\u4e00-\u9fa5a-zA-Z0-9\s]+$', keywords) and 1 <= len(keywords) <= 20:
             state['keywords'] = keywords
         else:
-            logging.warning(f"無效關鍵字：'{keywords}'，使用備用值")
             state['keywords'] = question.split()[-1] if question else ""
         print(f"提取關鍵字：{state['keywords']}")
-        sys.stdout.flush()
     except Exception as e:
         print(f"關鍵字提取失敗: {e}")
         state['keywords'] = question.split()[-1] if question else ""
@@ -125,7 +119,6 @@ def fetch_news(state: SentimentState) -> SentimentState:
     }
 
     print(f"開始抓取新聞：關鍵字 '{state['keywords']}'")
-    sys.stdout.flush()
 
     try:
         response = requests.get(url, headers=headers, timeout=10)
@@ -172,7 +165,6 @@ def fetch_news(state: SentimentState) -> SentimentState:
                 'link': link
             })
             print(f"抓取新聞 {i}：{title}")
-            sys.stdout.flush()
         except Exception as e:
             print(f"解析單篇新聞失敗: {e}")
             continue
@@ -190,7 +182,6 @@ def analyze_content(state: SentimentState) -> SentimentState:
     for i, article in enumerate(state['articles'], 1):
         content = sanitize_input(article['content'], max_length=1000)
         print(f"開始分析新聞 {i}：{article['title']}")
-        sys.stdout.flush()
 
         # 情緒分析
         sentiment_prompt = f"""
@@ -204,9 +195,7 @@ def analyze_content(state: SentimentState) -> SentimentState:
             sentiment_response = llm.generate_content(sentiment_prompt)
             sentiment = sentiment_response.text.strip()
             if sentiment not in ['正向', '負向', '中性']:
-                logging.warning(f"無效情緒回應：'{sentiment}'，默認為中性")
                 sentiment = '中性'
-            sys.stdout.flush()
         except Exception as e:
             print(f"情緒分析失敗: {e}")
             sentiment = '中性'
@@ -238,11 +227,9 @@ def analyze_content(state: SentimentState) -> SentimentState:
                 try:
                     label, text = entity.split(': ', 1)
                 except ValueError:
-                    logging.warning(f"無效 NER 格式：'{entity}'，跳過")
                     entities[j] = ""
             entities = [e for e in entities if e]
             # print(f"命名實體：{', '.join(entities) if entities else '無'}")
-            sys.stdout.flush()
         except Exception as e:
             print(f"NER 生成失敗: {e}")
             entities = []
@@ -261,7 +248,6 @@ def analyze_content(state: SentimentState) -> SentimentState:
             if len(summary) > 100:
                 summary = summary[:100]
             # print(f"摘要：{summary}")
-            sys.stdout.flush()
         except Exception as e:
             print(f"生成摘要失敗: {e}")
             summary = "無法生成摘要"
@@ -275,7 +261,6 @@ def analyze_content(state: SentimentState) -> SentimentState:
             'link': article['link']
         })
         print("-" * 50)
-        sys.stdout.flush()
 
     state['analyses'] = analyses
     return state
@@ -286,13 +271,11 @@ def format_response(state: SentimentState) -> SentimentState:
     if not state['is_related']:
         state['response'] = "抱歉，我只能回答與輿情分析相關的問題。"
         # print(state['response'])
-        sys.stdout.flush()
         return state
 
     if not state['articles'] or not state['analyses']:
         state['response'] = f"抱歉，無法找到與「{sanitize_input(state['keywords'])}」相關的新聞，請嘗試更具體的關鍵詞。"
         print(state['response'])
-        sys.stdout.flush()
         return state
 
     response = f"分析時間：{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n"
@@ -306,7 +289,6 @@ def format_response(state: SentimentState) -> SentimentState:
         response += f"命名實體：{', '.join(analysis['entities']) if analysis['entities'] else '無'}\n"
         response += f"來源：{analysis['link']}\n\n"
         print(response)
-        sys.stdout.flush()
         response = ""
     print('*' * 50)
 
@@ -341,12 +323,9 @@ def process_query(question: str):
 
 if __name__ == "__main__":
     print("歡迎使用輿情分析機器人！輸入 'exit' 可退出。")
-    sys.stdout.flush()
     while True:
         question = input("請輸入問題：")
         if question.lower() == 'exit':
             print("感謝使用，再見！")
-            sys.stdout.flush()
             break
         process_query(question)
-        sys.stdout.flush()
