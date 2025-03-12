@@ -1,4 +1,6 @@
 # 使用說明
+- llm選用gemini-1.5-flash，因為有免費額度XD
+- 框架使用LangGraph
 ### 建立環境 
 ```
 docker build -t bot-system .
