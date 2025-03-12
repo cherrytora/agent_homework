@@ -1,4 +1,4 @@
-from sentiment_bot.sentiment_bot import app as sentiment_app, process_query
+from sentiment_bot import process_query
 from rag_bot.rag_bot import app as rag_app, list_apis
 import sys
 import os
@@ -35,7 +35,7 @@ def run_sentiment_bot():
 
 def main():
     print("歡迎使用 Bot 切換系統！")
-    print("可用指令：'rag' 進入 RAG Bot，'sentiment' 進入 Sentiment Bot，'exit' 退出程式。")
+    print("可用指令：'rag' 進入 文件檢索聊天機器人，'sentiment' 進入 Sentiment Bot，'exit' 退出程式。")
 
     while True:
         choice = input("請選擇模式 (rag/sentiment/exit)：").lower()
