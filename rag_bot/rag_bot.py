@@ -17,7 +17,7 @@ genai.configure(api_key=GOOGLE_API_KEY)
 # 初始化 Gemini 模型
 version = 'gemini-1.5-flash'
 llm = genai.GenerativeModel(version)
-print(f"模型初始化完成：{version}")
+print(f"rag_bot 模型初始化完成：{version}")
 
 # laod embedding 模型
 embedder = SentenceTransformer('all-MiniLM-L6-v2')
@@ -45,7 +45,9 @@ def sanitize_input(text: str) -> str:
 
 # 讀取並解析 markdown 文件
 def load_markdown_with_tags(file_path: str) -> Dict[str, str]:
-    with open(file_path, 'r', encoding='utf-8') as f:
+    base_path = os.path.dirname(os.path.abspath(__file__))
+    full_path = os.path.join(base_path, file_path)
+    with open(full_path, 'r', encoding='utf-8') as f:
         content = f.read()
     html = markdown.markdown(content)
     lines = content.split('\n')
@@ -245,13 +247,13 @@ def list_apis():
     return list(docs.keys())
 
 
-if __name__ == "__main__":
-    print("歡迎使用文件檢索聊天機器人！輸入 'exit' 可退出。")
-    while True:
-        question = input("請輸入問題：")
-        if question.lower() == 'exit':
-            print("感謝使用，再見！")
-            break
-        result = app.invoke(
-            {"question": question, "retrieved_docs": [], "answer": ""})
-        print(result["answer"])
+# if __name__ == "__main__":
+#     print("歡迎使用文件檢索聊天機器人！輸入 'exit' 可退出。")
+#     while True:
+#         question = input("請輸入問題：")
+#         if question.lower() == 'exit':
+#             print("感謝使用，再見！")
+#             break
+#         result = app.invoke(
+#             {"question": question, "retrieved_docs": [], "answer": ""})
+#         print(result["answer"])

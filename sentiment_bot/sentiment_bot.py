@@ -28,7 +28,7 @@ class SentimentState(TypedDict):
 # 初始化 Gemini 模型
 version = 'gemini-1.5-flash'
 llm = genai.GenerativeModel(version)
-print(f"模型初始化完成：{version}")
+print(f"sentiment_bot 模型初始化完成：{version}")
 
 
 # 減少prompt injection風險
@@ -305,6 +305,7 @@ workflow.add_edge("extract_keywords", "fetch_news")
 workflow.add_edge("fetch_news", "analyze_content")
 workflow.add_edge("analyze_content", "format_response")
 workflow.add_edge("format_response", END)
+
 app = workflow.compile()
 
 
@@ -321,11 +322,11 @@ def process_query(question: str):
         pass
 
 
-if __name__ == "__main__":
-    print("歡迎使用輿情分析機器人！輸入 'exit' 可退出。")
-    while True:
-        question = input("請輸入問題：")
-        if question.lower() == 'exit':
-            print("感謝使用，再見！")
-            break
-        process_query(question)
+# if __name__ == "__main__":
+#     print("歡迎使用輿情分析機器人！輸入 'exit' 可退出。")
+#     while True:
+#         question = input("請輸入問題：")
+#         if question.lower() == 'exit':
+#             print("感謝使用，再見！")
+#             break
+#         process_query(question)

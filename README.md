@@ -1,11 +1,13 @@
 # code structure
 ```
 root/
-├── data/
-│   └── cache/
-│       └── KEYPO功能手冊文件.md
 ├── img/
 │   └── Sentiment_flow.svg
+└── rag_bot/
+    ├── dockerfile
+    ├── requirements.txt
+    ├── KEYPO功能手冊文件.md
+    └── rag_bot.py
 └── sentiment_bot/
     ├── dockerfile
     ├── requirements.txt
